@@ -28,8 +28,8 @@ class Produksi_telur extends CI_Controller {
         $data['data']  = $this->Produksi_telur_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('produksi_telur/index', $data);
         $this->load->view('templates/footer');
     }
@@ -46,8 +46,8 @@ class Produksi_telur extends CI_Controller {
         $data['unit_usaha'] = $this->Unit_usaha_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('produksi_telur/tambah', $data);
         $this->load->view('templates/footer');
     }
@@ -65,8 +65,8 @@ class Produksi_telur extends CI_Controller {
         $data['unit_usaha'] = $this->Unit_usaha_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('produksi_telur/edit', $data);
         $this->load->view('templates/footer');
     }

@@ -1,7 +1,7 @@
 <div class="container-fluid dashboard-content">
 
-    <!-- Page Heading -->
-    <div class="mb-4 text-center">
+    <!-- PAGE HEADING -->
+    <div class="mb-5 text-center">
         <h1 class="h4 font-weight-bold text-white mb-1">
             Selamat Datang, Administrator 👋
         </h1>
@@ -10,61 +10,56 @@
         </small>
     </div>
 
+    <!-- DASHBOARD CARDS -->
     <div class="row">
 
         <!-- SALDO KAS -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-blue h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="text-primary mb-1">
-                                <i class="fas fa-wallet mr-1"></i> Saldo Kas
-                            </h6>
-                            <h4 class="font-weight-bold text-white mb-0">
-                                Rp <?= number_format($saldo_kas ?? 0, 0, ',', '.') ?>
-                            </h4>
+            <div class="card dashboard-card border-left-blue h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="card-label text-primary">
+                            <i class="fas fa-wallet mr-1"></i> Saldo Kas
                         </div>
-                        <i class="fas fa-coins fa-2x text-primary opacity-50"></i>
+                        <div class="card-value">
+                            Rp <?= number_format($saldo_kas ?? 0, 0, ',', '.') ?>
+                        </div>
                     </div>
+                    <i class="fas fa-coins card-icon text-primary"></i>
                 </div>
             </div>
         </div>
 
         <!-- PENDAPATAN -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-green h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="text-success mb-1">
-                                <i class="fas fa-arrow-up mr-1"></i> Pendapatan
-                            </h6>
-                            <h4 class="font-weight-bold text-white mb-0">
-                                Rp <?= number_format($pendapatan ?? 0, 0, ',', '.') ?>
-                            </h4>
+            <div class="card dashboard-card border-left-green h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="card-label text-success">
+                            <i class="fas fa-arrow-up mr-1"></i> Pendapatan
                         </div>
-                        <i class="fas fa-chart-line fa-2x text-success opacity-50"></i>
+                        <div class="card-value">
+                            Rp <?= number_format($pendapatan ?? 0, 0, ',', '.') ?>
+                        </div>
                     </div>
+                    <i class="fas fa-chart-line card-icon text-success"></i>
                 </div>
             </div>
         </div>
 
         <!-- BEBAN -->
         <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-red h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 class="text-danger mb-1">
-                                <i class="fas fa-arrow-down mr-1"></i> Beban
-                            </h6>
-                            <h4 class="font-weight-bold text-white mb-0">
-                                Rp <?= number_format($beban ?? 0, 0, ',', '.') ?>
-                            </h4>
+            <div class="card dashboard-card border-left-red h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="card-label text-danger">
+                            <i class="fas fa-arrow-down mr-1"></i> Beban
                         </div>
-                        <i class="fas fa-receipt fa-2x text-danger opacity-50"></i>
+                        <div class="card-value">
+                            Rp <?= number_format($beban ?? 0, 0, ',', '.') ?>
+                        </div>
                     </div>
+                    <i class="fas fa-receipt card-icon text-danger"></i>
                 </div>
             </div>
         </div>
@@ -75,14 +70,40 @@
 
 <style>
 /* ===============================
-   DASHBOARD SPACING
+   DASHBOARD FIX – LEFT ALIGNED
 ================================ */
 .dashboard-content {
-    padding-top: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
-/* Icon opacity */
-.opacity-50 {
-    opacity: 0.5;
+/* CARD STYLE */
+.dashboard-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
+
+.card-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.card-icon {
+    font-size: 2.2rem;
+    opacity: 0.35;
+}
+
+/* BORDER */
+.border-left-blue  { border-left: 4px solid #4f7cff !important; }
+.border-left-green { border-left: 4px solid #2ecc71 !important; }
+.border-left-red   { border-left: 4px solid #e74c3c !important; }
 </style>

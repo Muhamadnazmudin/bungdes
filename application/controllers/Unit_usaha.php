@@ -25,8 +25,8 @@ class Unit_usaha extends CI_Controller {
         $data['unit']  = $this->Unit_usaha_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('unit_usaha/index', $data);
         $this->load->view('templates/footer');
     }
@@ -41,8 +41,8 @@ class Unit_usaha extends CI_Controller {
         $data['title'] = 'Tambah Unit Usaha';
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('unit_usaha/tambah');
         $this->load->view('templates/footer');
     }
@@ -58,8 +58,8 @@ class Unit_usaha extends CI_Controller {
         $data['unit']  = $this->Unit_usaha_model->get_by_id($id);
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('unit_usaha/edit', $data);
         $this->load->view('templates/footer');
     }

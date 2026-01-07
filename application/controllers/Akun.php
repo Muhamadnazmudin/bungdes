@@ -30,8 +30,8 @@ class Akun extends CI_Controller {
     }
 
     $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar');
-    $this->load->view('templates/topbar');
+    
+    
     $this->load->view('akun/index', $data);
     $this->load->view('templates/footer');
 }
@@ -48,8 +48,8 @@ class Akun extends CI_Controller {
         $data['parent'] = $this->Akun_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('akun/tambah', $data);
         $this->load->view('templates/footer');
     }
@@ -66,8 +66,8 @@ class Akun extends CI_Controller {
     $data['parent'] = $this->Akun_model->get_all_with_inactive();
 
     $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar');
-    $this->load->view('templates/topbar');
+    
+    
     $this->load->view('akun/edit', $data);
     $this->load->view('templates/footer');
 }

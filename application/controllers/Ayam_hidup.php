@@ -16,8 +16,8 @@ class Ayam_hidup extends CI_Controller {
         $data['data']  = $this->Ayam_hidup_model->getBukuPopulasi();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('ayam_hidup/index', $data);
         $this->load->view('templates/footer');
     }

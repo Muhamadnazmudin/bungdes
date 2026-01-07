@@ -28,8 +28,8 @@ class Neraca extends CI_Controller {
     $data['laba_ditahan'] = $this->Laba_rugi_model->get_laba_rugi();
 
     $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar');
-    $this->load->view('templates/topbar');
+    
+    
     $this->load->view('neraca/index', $data);
     $this->load->view('templates/footer');
 }

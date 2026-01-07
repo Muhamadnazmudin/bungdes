@@ -22,8 +22,8 @@ class Arus_kas extends CI_Controller {
         $data['pendanaan']   = $this->Arus_kas_model->get_pendanaan();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('arus_kas/index', $data);
         $this->load->view('templates/footer');
     }

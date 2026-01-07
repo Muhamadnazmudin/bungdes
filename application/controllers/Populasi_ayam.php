@@ -24,8 +24,8 @@ class Populasi_ayam extends CI_Controller {
         $data['data']  = $this->Populasi_ayam_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('populasi_ayam/index', $data);
         $this->load->view('templates/footer');
     }
@@ -41,8 +41,8 @@ class Populasi_ayam extends CI_Controller {
         $data['kandang'] = $this->Kandang_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('populasi_ayam/tambah', $data);
         $this->load->view('templates/footer');
     }
@@ -58,8 +58,8 @@ class Populasi_ayam extends CI_Controller {
     $data['kandang']  = $this->Kandang_model->get_all();
 
     $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar');
-    $this->load->view('templates/topbar');
+    
+    
     $this->load->view('populasi_ayam/edit', $data);
     $this->load->view('templates/footer');
 }

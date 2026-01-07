@@ -21,8 +21,8 @@ class Laba_rugi extends CI_Controller {
         $data['beban']      = $this->Laba_rugi_model->get_beban();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('laba_rugi/index', $data);
         $this->load->view('templates/footer');
     }

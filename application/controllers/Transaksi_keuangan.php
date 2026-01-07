@@ -29,8 +29,8 @@ class Transaksi_keuangan extends CI_Controller {
         $data['data']  = $this->Transaksi_keuangan_model->get_all();
 
         $this->load->view('templates/header',$data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('transaksi_keuangan/index',$data);
         $this->load->view('templates/footer');
     }
@@ -48,8 +48,8 @@ class Transaksi_keuangan extends CI_Controller {
         $data['unit_usaha'] = $this->Unit_usaha_model->get_all();
 
         $this->load->view('templates/header',$data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('transaksi_keuangan/tambah',$data);
         $this->load->view('templates/footer');
     }
@@ -84,8 +84,8 @@ class Transaksi_keuangan extends CI_Controller {
     $data['unit']  = $this->Transaksi_keuangan_model->get_unit_usaha();
 
     $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar');
-    $this->load->view('templates/topbar');
+    
+    
     $this->load->view('transaksi_keuangan/edit', $data);
     $this->load->view('templates/footer');
 }

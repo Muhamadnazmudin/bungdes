@@ -30,8 +30,8 @@ class Kandang extends CI_Controller {
         }
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kandang/index', $data);
         $this->load->view('templates/footer');
     }
@@ -46,8 +46,8 @@ class Kandang extends CI_Controller {
         $data['title'] = 'Tambah Kandang';
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kandang/tambah');
         $this->load->view('templates/footer');
     }
@@ -63,8 +63,8 @@ class Kandang extends CI_Controller {
         $data['kandang'] = $this->Kandang_model->get_by_id($id);
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kandang/edit', $data);
         $this->load->view('templates/footer');
     }

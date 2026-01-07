@@ -16,8 +16,8 @@ class Ayam_mati extends CI_Controller {
         $data['data']  = $this->Ayam_mati_model->getAll();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('ayam_mati/index', $data);
         $this->load->view('templates/footer');
     }
@@ -33,8 +33,8 @@ class Ayam_mati extends CI_Controller {
         }
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('ayam_mati/form', $data);
         $this->load->view('templates/footer');
     }
@@ -51,8 +51,8 @@ class Ayam_mati extends CI_Controller {
         }
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('ayam_mati/form', $data);
         $this->load->view('templates/footer');
     }

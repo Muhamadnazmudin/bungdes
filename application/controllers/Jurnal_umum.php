@@ -24,8 +24,8 @@ class Jurnal_umum extends CI_Controller {
         $data['jurnal'] = $this->Jurnal_umum_model->get_all();
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('jurnal_umum/index', $data);
         $this->load->view('templates/footer');
     }

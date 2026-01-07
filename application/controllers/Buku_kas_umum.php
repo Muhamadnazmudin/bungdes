@@ -26,8 +26,8 @@ class Buku_kas_umum extends CI_Controller {
         }
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('buku_kas_umum/index', $data);
         $this->load->view('templates/footer');
     }

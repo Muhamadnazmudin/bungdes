@@ -24,8 +24,8 @@ class Kas extends CI_Controller {
         $data['kas']   = $this->Kas_model->get_all();
 
         $this->load->view('templates/header',$data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kas/index',$data);
         $this->load->view('templates/footer');
     }
@@ -41,8 +41,8 @@ class Kas extends CI_Controller {
         $data['akun']  = $this->Akun_model->get_kas_bank(); // hanya akun kas/bank
 
         $this->load->view('templates/header',$data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kas/tambah',$data);
         $this->load->view('templates/footer');
     }
@@ -59,8 +59,8 @@ class Kas extends CI_Controller {
         $data['akun']  = $this->Akun_model->get_kas_bank();
 
         $this->load->view('templates/header',$data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('kas/edit',$data);
         $this->load->view('templates/footer');
     }

@@ -31,7 +31,14 @@
     </style>
 </head>
 
-<body id="page-top">
+<body id="page-top" class="dark-mode">
 
-<!-- Page Wrapper -->
 <div id="wrapper">
+
+    <?php $this->load->view('templates/sidebar'); ?>
+
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <div id="content">
+
+            <?php $this->load->view('templates/topbar'); ?>

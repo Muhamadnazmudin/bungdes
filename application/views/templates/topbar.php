@@ -1,32 +1,28 @@
-<nav class="navbar navbar-expand navbar-light topbar shadow-sm custom-topbar">
+<nav class="navbar navbar-expand topbar shadow-sm custom-topbar">
 
-    <!-- LEFT: Sidebar Toggle -->
-    <button id="sidebarToggleTop"
-            class="btn btn-link d-md-none rounded-circle mr-3"
-            aria-label="Toggle Sidebar">
-        <i class="fa fa-bars"></i>
-    </button>
+    <div class="container-fluid d-flex align-items-center">
 
-    <!-- RIGHT -->
-    <ul class="navbar-nav ml-auto align-items-center">
+        <!-- LEFT SPACER (INI KUNCI UTAMA) -->
+        <div class="flex-grow-1"></div>
 
-        <!-- DARK / LIGHT TOGGLE (UJUNG KANAN) -->
-        <li class="nav-item">
+        <!-- RIGHT CONTENT -->
+        <div class="d-flex align-items-center">
+
+            <!-- DARK / LIGHT TOGGLE -->
             <button id="themeToggle"
-                    class="btn btn-link rounded-circle"
-                    aria-label="Toggle Dark Mode"
-                    title="Dark / Light Mode">
+                    class="btn btn-link rounded-circle mr-3"
+                    title="Dark / Light Mode"
+                    aria-label="Toggle Dark Mode">
                 <i class="fas fa-moon"></i>
             </button>
-        </li>
 
-        <!-- ADMIN INFO -->
-        <li class="nav-item d-none d-sm-inline-block ml-2">
-            <span class="nav-link small">
+            <!-- ADMIN INFO -->
+            <span class="small text-muted">
                 Administrator | Admin
             </span>
-        </li>
 
-    </ul>
+        </div>
+
+    </div>
 
 </nav>

@@ -31,8 +31,8 @@ class Pajak extends CI_Controller {
 
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('pajak/index', $data);
         $this->load->view('templates/footer');
     }
@@ -47,8 +47,8 @@ class Pajak extends CI_Controller {
         $data['title'] = 'Tambah Pajak';
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('pajak/tambah');
         $this->load->view('templates/footer');
     }
@@ -64,8 +64,8 @@ class Pajak extends CI_Controller {
         $data['pajak'] = $this->Pajak_model->get_by_id($id);
 
         $this->load->view('templates/header', $data);
-        $this->load->view('templates/sidebar');
-        $this->load->view('templates/topbar');
+        
+        
         $this->load->view('pajak/edit', $data);
         $this->load->view('templates/footer');
     }
