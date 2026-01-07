@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+
+    <!-- Mobile First -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title><?= $title ?? 'BUMDes' ?></title>
+
+    <!-- Font Awesome -->
+    <link href="<?= base_url('assets/sbadmin2/vendor/fontawesome-free/css/all.min.css') ?>" rel="stylesheet">
+
+    <!-- SB Admin 2 Core CSS -->
+    <link href="<?= base_url('assets/sbadmin2/css/sb-admin-2.min.css') ?>" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-size: 14px;
+        }
+
+        /* Mobile heading normalization */
+        @media (max-width: 767px) {
+            h1, h2, h3, h4 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
