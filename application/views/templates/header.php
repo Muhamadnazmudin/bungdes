@@ -13,6 +13,17 @@
 
     <!-- SB Admin 2 Core CSS -->
     <link href="<?= base_url('assets/sbadmin2/css/sb-admin-2.min.css') ?>" rel="stylesheet">
+    <script>
+(function () {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'light') {
+        document.body.classList.remove('dark-mode');
+    } else {
+        document.body.classList.add('dark-mode');
+    }
+})();
+</script>
+
     <style>
         html, body {
             height: 100%;

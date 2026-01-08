@@ -6,7 +6,7 @@ class Unit_usaha extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-
+        $this->load->library('user_agent');
         if (!$this->session->userdata('login')) {
             redirect('auth/login');
         }

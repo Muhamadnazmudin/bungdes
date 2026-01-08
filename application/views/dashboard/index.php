@@ -2,7 +2,7 @@
 
     <!-- PAGE HEADING -->
     <div class="mb-5 text-center">
-        <h1 class="h4 font-weight-bold text-white mb-1">
+        <h1 class="h4 font-weight-bold page-title mb-1">
             Selamat Datang, Administrator 👋
         </h1>
         <small class="text-muted">

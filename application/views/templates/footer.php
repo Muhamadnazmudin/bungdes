@@ -12,29 +12,17 @@
 <script src="<?= base_url('assets/sbadmin2/vendor/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
 <script src="<?= base_url('assets/sbadmin2/vendor/jquery-easing/jquery.easing.min.js') ?>"></script>
 <script src="<?= base_url('assets/sbadmin2/js/sb-admin-2.min.js') ?>"></script>
-
 <script>
-/* =====================================================
-   GLOBAL UI HANDLER (AMAN)
-===================================================== */
 $(document).ready(function () {
 
-    /* Auto close sidebar on mobile */
-    if ($(window).width() < 768) {
-        $('.sidebar .nav-item a').on('click', function () {
-            $('body').removeClass('sidebar-toggled');
-            $('.sidebar').removeClass('toggled');
-        });
-    }
-
-    /* ===============================
-       DARK MODE (PERSIST)
-    ================================ */
     const theme = localStorage.getItem('theme');
 
     if (theme === 'dark') {
         $('body').addClass('dark-mode');
         $('#themeToggle i').removeClass('fa-moon').addClass('fa-sun');
+    } else {
+        $('body').removeClass('dark-mode');
+        $('#themeToggle i').removeClass('fa-sun').addClass('fa-moon');
     }
 
     $('#themeToggle').on('click', function () {
@@ -51,6 +39,35 @@ $(document).ready(function () {
 
 });
 </script>
+<script>
+$(document).ready(function () {
+
+    /* ===============================
+       MOBILE: AUTO CLOSE SETELAH KLIK SUBMENU
+    ================================ */
+    if ($(window).width() < 768) {
+
+        $('.sidebar .collapse-item').on('click', function () {
+
+            // Tutup sidebar
+            $('body').removeClass('sidebar-toggled');
+            $('.sidebar').removeClass('toggled');
+
+            // Tutup submenu (collapse)
+            $(this).closest('.collapse').removeClass('show');
+
+            // Reset parent arrow
+            $(this)
+                .closest('.nav-item')
+                .find('.nav-link[data-toggle="collapse"]')
+                .addClass('collapsed');
+        });
+
+    }
+
+});
+</script>
+
 
 <style>
 /* =====================================================
@@ -199,6 +216,120 @@ body.dark-mode .btn-primary {
 
 body.dark-mode .btn-warning {
     color: #111 !important;
+}
+/* =====================================================
+   FINAL SCROLL LAYOUT FIX (STABIL)
+===================================================== */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* body TIDAK scroll */
+}
+
+/* Wrapper utama */
+#wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+#sidebar {
+    width: 250px;
+    background: #1e293b;
+    height: 100vh;
+
+    overflow-y: auto;   /* ✅ sidebar bisa scroll */
+    overflow-x: hidden;
+}
+.sidebar-scroll {
+    background: red;
+}
+/* override text-white khusus judul */
+body:not(.dark-mode) h1.text-white,
+body:not(.dark-mode) h2.text-white,
+body:not(.dark-mode) h3.text-white {
+    color: #111827 !important;
+}
+/* =====================================================
+   SIDEBAR SUBMENU – GLASS / OPACITY
+===================================================== */
+
+/* container submenu */
+.sidebar .collapse .collapse-inner,
+.sidebar .collapsing .collapse-inner {
+    background: rgba(255,255,255,0.08) !important; /* opacity */
+    backdrop-filter: blur(6px);                   /* glass */
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 10px;
+    padding: 0.5rem 0;
+    margin: 0.25rem 0.75rem; /* jarak dari sidebar */
+}
+
+/* item submenu */
+.sidebar .collapse-item {
+    background: transparent !important;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 6px;
+    margin: 0.125rem 0.5rem;
+}
+
+/* hover */
+.sidebar .collapse-item:hover {
+    background: rgba(255,255,255,0.12) !important;
+    color: #ffffff !important;
+}
+
+/* active */
+.sidebar .collapse-item.active {
+    background: rgba(255,255,255,0.2) !important;
+    color: #ffffff !important;
+    font-weight: 500;
+}
+/* =====================================================
+   MOBILE SUBMENU – LIGHT MODE TEXT FIX
+===================================================== */
+
+/* KHUSUS MOBILE */
+@media (max-width: 767px) {
+
+    /* LIGHT MODE */
+    body:not(.dark-mode) .sidebar .collapse-item {
+        color: #111827 !important; /* hitam */
+    }
+
+    body:not(.dark-mode) .sidebar .collapse-item:hover {
+        background: rgba(0,0,0,0.06) !important;
+        color: #111827 !important;
+    }
+
+    body:not(.dark-mode) .sidebar .collapse-item.active {
+        background: rgba(0,0,0,0.1) !important;
+        color: #111827 !important;
+        font-weight: 500;
+    }
+
+    /* container submenu */
+    body:not(.dark-mode) .sidebar .collapse-inner {
+        background: rgba(255,255,255,0.92) !important;
+        backdrop-filter: blur(6px);
+    }
+
+}
+/* =====================================================
+   SIDEBAR LOGO
+===================================================== */
+.sidebar-logo {
+    width: 70px;
+    height: 60px;
+    object-fit: contain;
+}
+
+/* mobile sedikit lebih kecil */
+@media (max-width: 767px) {
+    .sidebar-logo {
+        width: 30px;
+        height: 30px;
+    }
 }
 
 </style>

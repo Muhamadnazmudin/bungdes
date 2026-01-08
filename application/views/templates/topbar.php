@@ -1,8 +1,14 @@
 <nav class="navbar navbar-expand topbar shadow-sm custom-topbar">
-
     <div class="container-fluid d-flex align-items-center">
 
-        <!-- LEFT SPACER (INI KUNCI UTAMA) -->
+        <!-- MOBILE SIDEBAR TOGGLE (WAJIB) -->
+        <button id="sidebarToggleTop"
+                class="btn btn-link d-md-none rounded-circle mr-2"
+                aria-label="Toggle Sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- LEFT SPACER -->
         <div class="flex-grow-1"></div>
 
         <!-- RIGHT CONTENT -->
@@ -24,5 +30,4 @@
         </div>
 
     </div>
-
 </nav>
