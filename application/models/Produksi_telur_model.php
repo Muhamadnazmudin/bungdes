@@ -4,17 +4,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Produksi_telur_model extends CI_Model {
 
     public function get_all()
-    {
-        return $this->db
-            ->select('p.*, k.nama AS nama_kandang, u.nama AS nama_unit')
-            ->from('produksi_telur p')
-            ->join('kandang k','k.id = p.kandang_id')
-            ->join('unit_usaha u','u.id = p.unit_usaha_id')
-            ->order_by('p.tanggal','DESC')
-            ->get()
-            ->result();
-    }
-
+{
+    return $this->db
+        ->select('
+            p.*,
+            u.kode AS kode_unit,
+            u.nama AS nama_unit,
+            k.kode AS kode_kandang,
+            k.nama AS nama_kandang
+        ')
+        ->from('produksi_telur p')
+        ->join('unit_usaha u','u.id=p.unit_usaha_id','left')
+        ->join('kandang k','k.id=p.kandang_id','left')
+        ->order_by('p.tanggal','DESC')
+        ->order_by('p.id','DESC')
+        ->get()
+        ->result();
+}
     public function get_by_id($id)
     {
         return $this->db
@@ -31,7 +37,6 @@ class Produksi_telur_model extends CI_Model {
         'kandang_id'     => $data['kandang_id'],
         'jumlah_telur'   => $data['jumlah_telur'],
         'berat_kg'       => $data['berat_kg'],
-        'berat_gram'     => $data['berat_gram'],
         'keterangan'     => $data['keterangan']
     ]);
 }
@@ -45,7 +50,6 @@ class Produksi_telur_model extends CI_Model {
         'kandang_id'     => $data['kandang_id'],
         'jumlah_telur'   => $data['jumlah_telur'],
         'berat_kg'       => $data['berat_kg'],
-        'berat_gram'     => $data['berat_gram'],
         'keterangan'     => $data['keterangan']
     ]);
 }

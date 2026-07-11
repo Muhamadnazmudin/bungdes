@@ -9,7 +9,10 @@ $master_active = in_array($seg1, [
 
 /* ================= OPERASIONAL ================= */
 $operasional_active = in_array($seg1, [
-    'produksi_telur','ayam_sakit','ayam_mati'
+    'produksi_telur',
+    'penjualan_telur',
+    'ayam_sakit',
+    'ayam_mati'
 ]);
 
 /* ================= KEUANGAN ================= */
@@ -83,9 +86,25 @@ $laporan_active = in_array($seg1, [
         <div id="operasional"
              class="collapse <?= (!$is_mobile && $operasional_active) ? 'show' : '' ?>">
             <div class="collapse-inner rounded">
-                <a class="collapse-item <?= ($seg1 == 'produksi_telur') ? 'active' : '' ?>" href="<?= base_url('produksi_telur') ?>">Produksi Telur</a>
-                <a class="collapse-item <?= ($seg1 == 'ayam_sakit') ? 'active' : '' ?>" href="<?= base_url('ayam_sakit') ?>">Ayam Sakit</a>
-                <a class="collapse-item <?= ($seg1 == 'ayam_mati') ? 'active' : '' ?>" href="<?= base_url('ayam_mati') ?>">Ayam Mati</a>
+                <a class="collapse-item <?= ($seg1 == 'produksi_telur') ? 'active' : '' ?>"
+   href="<?= base_url('produksi_telur') ?>">
+   Produksi Telur
+</a>
+
+<a class="collapse-item <?= ($seg1 == 'penjualan_telur') ? 'active' : '' ?>"
+   href="<?= base_url('penjualan_telur') ?>">
+   Penjualan Telur
+</a>
+
+<a class="collapse-item <?= ($seg1 == 'ayam_sakit') ? 'active' : '' ?>"
+   href="<?= base_url('ayam_sakit') ?>">
+   Ayam Sakit
+</a>
+
+<a class="collapse-item <?= ($seg1 == 'ayam_mati') ? 'active' : '' ?>"
+   href="<?= base_url('ayam_mati') ?>">
+   Ayam Mati
+</a>
             </div>
         </div>
     </li>
