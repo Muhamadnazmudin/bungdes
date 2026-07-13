@@ -17,11 +17,12 @@ class Transaksi_keuangan extends CI_Controller
         }
 
         $this->load->model([
-            'Transaksi_keuangan_model',
-            'Kas_model',
-            'Akun_model',
-            'Unit_usaha_model'
-        ]);
+    'Transaksi_keuangan_model',
+    'Kas_model',
+    'Akun_model',
+    'Unit_usaha_model',
+    'Laba_rugi_model'
+]);
     }
 
     /* =====================================================
@@ -84,6 +85,22 @@ class Transaksi_keuangan extends CI_Controller
         if (!$data['transaksi']) {
             show_404();
         }
+        /*
+|--------------------------------------------------------------------------
+| Transaksi SHU tidak boleh diedit
+|--------------------------------------------------------------------------
+*/
+
+if($data['transaksi']->sumber == 'SHU'){
+
+    $this->session->set_flashdata(
+        'error',
+        'Transaksi SHU tidak dapat diedit. Gunakan Posting SHU.'
+    );
+
+    redirect('transaksi_keuangan');
+
+}
 
         $data['kas']        = $this->Kas_model->get_all();
         $data['akun']       = $this->Akun_model->get_all();
@@ -100,6 +117,22 @@ class Transaksi_keuangan extends CI_Controller
 
     public function update($id)
     {
+        $trx = $this->Transaksi_keuangan_model->get_by_id($id);
+
+if(!$trx){
+    show_404();
+}
+
+if($trx->sumber == 'SHU'){
+
+    $this->session->set_flashdata(
+        'error',
+        'Transaksi SHU tidak dapat diubah.'
+    );
+
+    redirect('transaksi_keuangan');
+
+}
         $this->Transaksi_keuangan_model->delete_jurnal($id);
 
         $this->Transaksi_keuangan_model->update(
@@ -123,6 +156,22 @@ class Transaksi_keuangan extends CI_Controller
 
     public function hapus($id)
     {
+        $trx = $this->Transaksi_keuangan_model->get_by_id($id);
+
+if(!$trx){
+    show_404();
+}
+
+if($trx->sumber == 'SHU'){
+
+    $this->session->set_flashdata(
+        'error',
+        'Transaksi SHU tidak dapat dihapus.'
+    );
+
+    redirect('transaksi_keuangan');
+
+}
         $this->Transaksi_keuangan_model->delete_jurnal($id);
 
         $this->Transaksi_keuangan_model->delete($id);
@@ -134,5 +183,49 @@ class Transaksi_keuangan extends CI_Controller
 
         redirect('transaksi_keuangan');
     }
+/* =====================================================
+ * POSTING SHU
+ * ===================================================== */
 
+public function posting_shu()
+{
+    $bulan = $this->input->post('bulan');
+    $tahun = $this->input->post('tahun');
+
+    if(empty($bulan) || empty($tahun)){
+
+        $this->session->set_flashdata(
+            'error',
+            'Periode belum dipilih.'
+        );
+
+        redirect('laba_rugi');
+    }
+
+   $proses = $this->Transaksi_keuangan_model
+            ->generate_shu(
+                $bulan,
+                $tahun
+            );
+
+if($proses){
+
+    $this->session->set_flashdata(
+        'success',
+        'Posting SHU berhasil dilakukan.'
+    );
+
+}else{
+
+    $this->session->set_flashdata(
+        'error',
+        'Posting SHU gagal.'
+    );
+
+}
+
+redirect(
+    'laba_rugi?bulan='.$bulan.'&tahun='.$tahun
+);
+}
 }

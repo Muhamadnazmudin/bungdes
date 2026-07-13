@@ -3,7 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Laba_rugi_model extends CI_Model
 {
+public function __construct()
+{
+    parent::__construct();
 
+    $this->load->model('Master_shu_model');
+}
     /* =====================================================
      * PENDAPATAN
      * ===================================================== */
@@ -112,5 +117,172 @@ class Laba_rugi_model extends CI_Model
         return $pendapatan - $beban;
 
     }
+/* =====================================================
+ * LAPORAN LABA RUGI
+ * ===================================================== */
 
+public function get_laporan($bulan=null,$tahun=null)
+{
+
+    $pendapatan = $this->get_pendapatan($bulan,$tahun);
+
+    $beban = $this->get_beban($bulan,$tahun);
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL
+    |--------------------------------------------------------------------------
+    */
+
+    $total_pendapatan = 0;
+
+    foreach($pendapatan as $r){
+
+        $total_pendapatan += $r->total;
+
+    }
+
+    $total_beban = 0;
+
+    foreach($beban as $r){
+
+        $total_beban += $r->total;
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LABA USAHA
+    |--------------------------------------------------------------------------
+    */
+
+    $laba_usaha = $total_pendapatan - $total_beban;
+
+    /*
+    |--------------------------------------------------------------------------
+    | MASTER SHU
+    |--------------------------------------------------------------------------
+    */
+
+    $master = $this->Master_shu_model
+                    ->get_all();
+
+    $detail = [];
+
+    $sisa_shu = $laba_usaha;
+
+    $total_pembagian = 0;
+
+    foreach($master as $m){
+
+        /*
+        -----------------------------------
+        Dasar Perhitungan
+        -----------------------------------
+        */
+
+        if($m->dasar == 'LABA_USAHA'){
+
+            $dasar = $laba_usaha;
+
+        }else{
+
+            $dasar = $sisa_shu;
+
+        }
+
+        /*
+        -----------------------------------
+        Nominal
+        -----------------------------------
+        */
+
+        $nominal = $dasar * $m->persentase / 100;
+
+        $detail[] = [
+
+            'id'=>$m->id,
+
+            'nama'=>$m->nama,
+
+            'akun_id'=>$m->akun_id,
+
+            'persentase'=>$m->persentase,
+
+            'dasar'=>$m->dasar,
+
+            'nominal'=>$nominal
+
+        ];
+
+        /*
+        -----------------------------------
+        Jika dihitung dari laba usaha
+        maka mengurangi sisa SHU
+        -----------------------------------
+        */
+
+        if($m->dasar == 'LABA_USAHA'){
+
+            $sisa_shu -= $nominal;
+
+        }else{
+
+            $total_pembagian += $nominal;
+
+        }
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LABA
+    |--------------------------------------------------------------------------
+    */
+
+    $laba = $sisa_shu - $total_pembagian;
+
+    /*
+    |--------------------------------------------------------------------------
+    | PPN
+    |--------------------------------------------------------------------------
+    */
+
+    $ppn = $laba * 12 / 100;
+
+    /*
+    |--------------------------------------------------------------------------
+    | LABA BERSIH
+    |--------------------------------------------------------------------------
+    */
+
+    $laba_bersih = $laba - $ppn;
+
+    return [
+
+        'pendapatan'=>$pendapatan,
+
+        'beban'=>$beban,
+
+        'total_pendapatan'=>$total_pendapatan,
+
+        'total_beban'=>$total_beban,
+
+        'laba_usaha'=>$laba_usaha,
+
+        'master_shu'=>$detail,
+
+        'sisa_shu'=>$sisa_shu,
+
+        'total_pembagian'=>$total_pembagian,
+
+        'laba'=>$laba,
+
+        'ppn'=>$ppn,
+
+        'laba_bersih'=>$laba_bersih
+
+    ];
+
+}
 }
