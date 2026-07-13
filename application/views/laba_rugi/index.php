@@ -2,10 +2,6 @@
 
 <?php
 
-/* ==========================================================
-| DATA LAPORAN
-========================================================== */
-
 $pendapatan       = $laporan['pendapatan'];
 $beban            = $laporan['beban'];
 
@@ -26,34 +22,7 @@ $ppn              = $laporan['ppn'];
 
 $laba_bersih      = $laporan['laba_bersih'];
 
-
-/* ==========================================================
-| MASTER BULAN
-========================================================== */
-
-$nama_bulan = [
-
-    1  => 'Januari',
-    2  => 'Februari',
-    3  => 'Maret',
-    4  => 'April',
-    5  => 'Mei',
-    6  => 'Juni',
-    7  => 'Juli',
-    8  => 'Agustus',
-    9  => 'September',
-    10 => 'Oktober',
-    11 => 'November',
-    12 => 'Desember'
-
-];
-
 ?>
-
-
-<!-- ==========================================================
-     PAGE HEADER
-========================================================== -->
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
 
@@ -65,11 +34,6 @@ $nama_bulan = [
 
 </div>
 
-
-
-<!-- ==========================================================
-     FILTER
-========================================================== -->
 
 <div class="card shadow mb-4">
 
@@ -89,72 +53,37 @@ $nama_bulan = [
 
             <div class="row">
 
-                <div class="col-md-4">
+                <div class="col-md-3">
 
-                    <label>Bulan</label>
+                    <label>Dari Tanggal</label>
 
-                    <select
-                        name="bulan"
-                        class="form-control">
-
-                        <option value="">
-
-                            Semua Bulan
-
-                        </option>
-
-                        <?php foreach($nama_bulan as $k=>$v): ?>
-
-                            <option
-                                value="<?= $k ?>"
-                                <?= ($bulan==$k)?'selected':'' ?>>
-
-                                <?= $v ?>
-
-                            </option>
-
-                        <?php endforeach; ?>
-
-                    </select>
+                    <input
+                        type="date"
+                        name="dari"
+                        class="form-control"
+                        value="<?= $dari ?>">
 
                 </div>
-
-
 
                 <div class="col-md-3">
 
-                    <label>Tahun</label>
+                    <label>Sampai Tanggal</label>
 
-                    <select
-                        name="tahun"
-                        class="form-control">
-
-                        <?php for($i=date('Y')-5;$i<=date('Y')+5;$i++): ?>
-
-                            <option
-                                value="<?= $i ?>"
-                                <?= ($tahun==$i)?'selected':'' ?>>
-
-                                <?= $i ?>
-
-                            </option>
-
-                        <?php endfor; ?>
-
-                    </select>
+                    <input
+                        type="date"
+                        name="sampai"
+                        class="form-control"
+                        value="<?= $sampai ?>">
 
                 </div>
 
-
-
-                <div class="col-md-5">
+                <div class="col-md-6">
 
                     <label>&nbsp;</label>
 
                     <div>
 
-                        <button
-                            class="btn btn-primary">
+                        <button class="btn btn-primary">
 
                             <i class="fas fa-search"></i>
 
@@ -163,7 +92,7 @@ $nama_bulan = [
                         </button>
 
                         <a
-                            href="<?= base_url('laba_rugi/cetak_pdf?bulan='.$bulan.'&tahun='.$tahun) ?>"
+                            href="<?= base_url('laba_rugi/cetak_pdf?dari='.$dari.'&sampai='.$sampai) ?>"
                             class="btn btn-danger">
 
                             <i class="fas fa-file-pdf"></i>
@@ -173,7 +102,7 @@ $nama_bulan = [
                         </a>
 
                         <a
-                            href="<?= base_url('laba_rugi/export_excel?bulan='.$bulan.'&tahun='.$tahun) ?>"
+                            href="<?= base_url('laba_rugi/export_excel?dari='.$dari.'&sampai='.$sampai) ?>"
                             class="btn btn-success">
 
                             <i class="fas fa-file-excel"></i>
@@ -193,9 +122,6 @@ $nama_bulan = [
     </div>
 
 </div>
-
-
-
 <!-- ==========================================================
      STATUS POSTING SHU
 ========================================================== -->
@@ -230,17 +156,11 @@ $nama_bulan = [
 
                         </h5>
 
-                        <small>
+                        <p class="mb-0">
 
-                            Tanggal Posting :
+                            Data SHU pada periode ini sudah diposting.
 
-                            <strong>
-
-                                <!-- <?= date('d-m-Y H:i',strtotime($posting_shu->tanggal_posting)) ?> -->
-
-                            </strong>
-
-                        </small>
+                        </p>
 
                     </div>
 
@@ -256,19 +176,17 @@ $nama_bulan = [
 
                         </h5>
 
-                        <small>
+                        <p class="mb-0">
 
-                            Laporan ini masih berupa simulasi.
+                            Nilai SHU masih berupa simulasi dan belum menjadi transaksi keuangan.
 
-                        </small>
+                        </p>
 
                     </div>
 
                 <?php endif; ?>
 
             </div>
-
-
 
             <div class="col-md-4 text-right">
 
@@ -277,20 +195,20 @@ $nama_bulan = [
                     <form
                         action="<?= base_url('transaksi_keuangan/posting_shu') ?>"
                         method="post"
-                        onsubmit="return confirm('Posting SHU akan membuat transaksi keuangan beserta jurnal.\n\nLanjutkan?');">
+                        onsubmit="return confirm('Posting SHU sekarang?');">
 
                         <input
                             type="hidden"
                             name="bulan"
-                            value="<?= $bulan ?>">
+                            value="<?= date('n', strtotime($dari)) ?>">
 
                         <input
                             type="hidden"
                             name="tahun"
-                            value="<?= $tahun ?>">
+                            value="<?= date('Y', strtotime($dari)) ?>">
 
                         <button
-                            class="btn btn-warning btn-lg">
+                            class="btn btn-warning btn-lg btn-block">
 
                             <i class="fas fa-upload"></i>
 
@@ -302,15 +220,31 @@ $nama_bulan = [
 
                 <?php else: ?>
 
-                    <button
-                        class="btn btn-success btn-lg"
-                        disabled>
+                    <form
+                        action="<?= base_url('transaksi_keuangan/reset_shu') ?>"
+                        method="post"
+                        onsubmit="return confirm('Reset Posting SHU?\nSemua transaksi SHU periode ini akan dihapus.');">
 
-                        <i class="fas fa-check"></i>
+                        <input
+                            type="hidden"
+                            name="bulan"
+                            value="<?= date('n', strtotime($dari)) ?>">
 
-                        Sudah Diposting
+                        <input
+                            type="hidden"
+                            name="tahun"
+                            value="<?= date('Y', strtotime($dari)) ?>">
 
-                    </button>
+                        <button
+                            class="btn btn-danger btn-lg btn-block">
+
+                            <i class="fas fa-trash"></i>
+
+                            Reset SHU
+
+                        </button>
+
+                    </form>
 
                 <?php endif; ?>
 
@@ -321,46 +255,39 @@ $nama_bulan = [
     </div>
 
 </div>
-
-
-
 <!-- ==========================================================
-     LAPORAN
+     LAPORAN LABA RUGI
 ========================================================== -->
 
-<div class="card shadow">
+<div class="card shadow mb-4">
 
     <div class="card-body">
 
         <div class="text-center mb-4">
 
-            <h4 class="font-weight-bold">
-
+            <h4 class="font-weight-bold mb-1">
                 BUMDES
-
             </h4>
 
-            <h5>
-
+            <h5 class="mb-1">
                 UNIT USAHA PETERNAKAN AYAM PETELUR
-
             </h5>
 
             <h4 class="font-weight-bold">
-
                 LAPORAN LABA RUGI
-
             </h4>
 
-            <p>
+            <p class="mb-0">
 
                 Periode
 
                 <strong>
 
-                    <?= $bulan ? $nama_bulan[$bulan] : 'Januari s/d Desember' ?>
+                    <?= date('d F Y',strtotime($dari)); ?>
 
-                    <?= $tahun ?>
+                    s/d
+
+                    <?= date('d F Y',strtotime($sampai)); ?>
 
                 </strong>
 
@@ -370,26 +297,16 @@ $nama_bulan = [
 
         <table class="table table-bordered">
 
-            <thead class="bg-light">
+            <thead class="thead-light">
 
                 <tr>
 
-                    <th width="60" class="text-center">
+                    <th width="60" class="text-center">No</th>
 
-                        No
-
-                    </th>
-
-                    <th>
-
-                        Uraian
-
-                    </th>
+                    <th>Uraian</th>
 
                     <th width="220" class="text-right">
-
                         Jumlah (Rp)
-
                     </th>
 
                 </tr>
@@ -397,22 +314,19 @@ $nama_bulan = [
             </thead>
 
             <tbody>
-                <!-- ==========================================================
+
+<!-- ==========================================================
      A. PENDAPATAN
 ========================================================== -->
 
 <tr class="table-secondary font-weight-bold">
 
     <td class="text-center">
-
         A
-
     </td>
 
     <td colspan="2">
-
         PENDAPATAN
-
     </td>
 
 </tr>
@@ -445,7 +359,7 @@ $nama_bulan = [
 
 <?php endforeach; ?>
 
-<tr class="table-light font-weight-bold">
+<tr class="font-weight-bold bg-light">
 
     <td></td>
 
@@ -463,15 +377,11 @@ $nama_bulan = [
 
 </tr>
 
-
-
 <tr>
 
-    <td colspan="3" style="height:15px"></td>
+    <td colspan="3" style="height:15px;"></td>
 
 </tr>
-
-
 
 <!-- ==========================================================
      B. BEBAN
@@ -480,15 +390,11 @@ $nama_bulan = [
 <tr class="table-secondary font-weight-bold">
 
     <td class="text-center">
-
         B
-
     </td>
 
     <td colspan="2">
-
         BEBAN
-
     </td>
 
 </tr>
@@ -521,7 +427,7 @@ $nama_bulan = [
 
 <?php endforeach; ?>
 
-<tr class="table-light font-weight-bold">
+<tr class="font-weight-bold bg-light">
 
     <td></td>
 
@@ -539,15 +445,11 @@ $nama_bulan = [
 
 </tr>
 
-
-
 <tr>
 
-    <td colspan="3" style="height:15px"></td>
+    <td colspan="3" style="height:15px;"></td>
 
 </tr>
-
-
 
 <!-- ==========================================================
      C. LABA USAHA
@@ -575,14 +477,11 @@ $nama_bulan = [
 
 </tr>
 
-
-
 <tr>
 
-    <td colspan="3" style="height:18px"></td>
+    <td colspan="3" style="height:20px;"></td>
 
 </tr>
-
 <!-- ==========================================================
      D. PEMBAGIAN SHU
 ========================================================== -->
@@ -590,26 +489,18 @@ $nama_bulan = [
 <tr class="table-secondary font-weight-bold">
 
     <td class="text-center">
-
         D
-
     </td>
 
     <td colspan="2">
-
         PEMBAGIAN SHU
-
     </td>
 
 </tr>
 
-<?php
+<?php $no = 1; ?>
 
-$no = 1;
-
-foreach($master_shu as $item):
-
-?>
+<?php foreach($master_shu as $item): ?>
 
 <tr>
 
@@ -627,13 +518,13 @@ foreach($master_shu as $item):
 
         <small class="text-muted">
 
-            <?= number_format($item['persentase'],2) ?> %
+            <?= number_format($item['persentase'],2); ?> %
 
             dari
 
             <?= ($item['dasar']=='LABA_USAHA')
-                ? 'Laba Usaha'
-                : 'Sisa SHU'; ?>
+                    ? 'Laba Usaha'
+                    : 'Sisa SHU'; ?>
 
         </small>
 
@@ -641,7 +532,7 @@ foreach($master_shu as $item):
 
     <td class="text-right">
 
-        <?= number_format($item['nominal'],0,',','.') ?>
+        <?= number_format($item['nominal'],0,',','.'); ?>
 
     </td>
 
@@ -650,8 +541,7 @@ foreach($master_shu as $item):
 <?php endforeach; ?>
 
 
-
-<tr class="table-light font-weight-bold">
+<tr class="bg-light font-weight-bold">
 
     <td></td>
 
@@ -663,15 +553,14 @@ foreach($master_shu as $item):
 
     <td class="text-right">
 
-        <?= number_format($sisa_shu,0,',','.') ?>
+        <?= number_format($sisa_shu,0,',','.'); ?>
 
     </td>
 
 </tr>
 
 
-
-<tr class="table-light font-weight-bold">
+<tr class="bg-light font-weight-bold">
 
     <td></td>
 
@@ -683,24 +572,22 @@ foreach($master_shu as $item):
 
     <td class="text-right">
 
-        <?= number_format($total_pembagian,0,',','.') ?>
+        <?= number_format($total_pembagian,0,',','.'); ?>
 
     </td>
 
 </tr>
 
 
-
 <tr>
 
-    <td colspan="3" style="height:18px"></td>
+    <td colspan="3" style="height:20px;"></td>
 
 </tr>
 
 
-
 <!-- ==========================================================
-     E. LABA SEBELUM PAJAK
+     E. LABA SETELAH PEMBAGIAN
 ========================================================== -->
 
 <tr class="table-warning font-weight-bold">
@@ -713,18 +600,17 @@ foreach($master_shu as $item):
 
     <td>
 
-        LABA SEBELUM PAJAK
+        LABA SETELAH PEMBAGIAN SHU
 
     </td>
 
     <td class="text-right">
 
-        <?= number_format($laba,0,',','.') ?>
+        <?= number_format($laba,0,',','.'); ?>
 
     </td>
 
 </tr>
-
 
 
 <tr>
@@ -739,12 +625,11 @@ foreach($master_shu as $item):
 
     <td class="text-right">
 
-        <?= number_format($ppn,0,',','.') ?>
+        <?= number_format($ppn,0,',','.'); ?>
 
     </td>
 
 </tr>
-
 
 
 <tr class="table-success font-weight-bold">
@@ -763,150 +648,166 @@ foreach($master_shu as $item):
 
     <td class="text-right">
 
-        <?= number_format($laba_bersih,0,',','.') ?>
+        <?= number_format($laba_bersih,0,',','.'); ?>
 
     </td>
 
 </tr>
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-<hr>
+        <hr>
 
-<div class="row">
+        <div class="row">
 
-    <div class="col-md-7">
+            <div class="col-md-8">
 
-        <?php if($posting_shu): ?>
+                <?php if($posting_shu): ?>
 
-            <div class="alert alert-success mb-0">
+                    <div class="alert alert-success mb-0">
 
-                <h5>
+                        <h5>
 
-                    <i class="fas fa-check-circle"></i>
+                            <i class="fas fa-check-circle"></i>
 
-                    SHU Sudah Diposting
+                            SHU Sudah Diposting
 
-                </h5>
+                        </h5>
 
-                <p class="mb-1">
+                        <p class="mb-2">
 
-                    Tanggal Posting
+                            Nilai SHU pada periode ini sudah diposting menjadi transaksi keuangan.
 
-                </p>
+                        </p>
 
-                <strong>
+                        <ul class="mb-0">
 
-                    <!-- <?= date('d-m-Y H:i',strtotime($posting_shu->tanggal_posting)); ?> -->
+                            <li>Transaksi Keuangan</li>
 
-                </strong>
+                            <li>Jurnal Umum</li>
 
-                <hr>
+                            <li>Buku Besar</li>
 
-                <small>
+                            <li>Buku Kas Umum</li>
 
-                    Posting SHU telah menghasilkan transaksi pada:
+                            <li>Arus Kas</li>
 
-                    <ul class="mb-0 mt-2">
+                            <li>Neraca</li>
 
-                        <li>Transaksi Keuangan</li>
+                        </ul>
 
-                        <li>Jurnal Umum</li>
+                    </div>
 
-                        <li>Buku Besar</li>
+                <?php else: ?>
 
-                        <li>Buku Kas Umum</li>
+                    <div class="alert alert-warning mb-0">
 
-                        <li>Arus Kas</li>
+                        <h5>
 
-                        <li>Neraca</li>
+                            <i class="fas fa-exclamation-triangle"></i>
 
-                    </ul>
+                            SHU Belum Diposting
 
-                </small>
+                        </h5>
+
+                        <p class="mb-0">
+
+                            Nilai pembagian SHU masih berupa simulasi.
+
+                            Setelah melakukan <strong>Posting SHU</strong>,
+                            sistem otomatis membuat:
+
+                        </p>
+
+                        <ul class="mt-2 mb-0">
+
+                            <li>Transaksi Keuangan</li>
+
+                            <li>Jurnal Umum</li>
+
+                            <li>Buku Besar</li>
+
+                            <li>Buku Kas Umum</li>
+
+                            <li>Arus Kas</li>
+
+                            <li>Neraca</li>
+
+                        </ul>
+
+                    </div>
+
+                <?php endif; ?>
 
             </div>
 
-        <?php else: ?>
 
-            <div class="alert alert-warning mb-0">
+            <div class="col-md-4 text-right align-self-center">
 
-                <h5>
+                <?php if(!$posting_shu): ?>
 
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <form
+                        action="<?= base_url('transaksi_keuangan/posting_shu'); ?>"
+                        method="post"
+                        onsubmit="return confirm('Posting SHU periode ini?');">
 
-                    SHU Belum Diposting
+                        <input
+                            type="hidden"
+                            name="bulan"
+                            value="<?= date('n',strtotime($dari)); ?>">
 
-                </h5>
+                        <input
+                            type="hidden"
+                            name="tahun"
+                            value="<?= date('Y',strtotime($dari)); ?>">
 
-                <p class="mb-0">
+                        <button
+                            class="btn btn-warning btn-lg btn-block">
 
-                    Nilai pembagian SHU di atas masih berupa simulasi.
+                            <i class="fas fa-upload"></i>
 
-                    Setelah dilakukan <strong>Posting SHU</strong>,
-                    sistem akan membuat transaksi keuangan secara otomatis
-                    sesuai data Master SHU.
+                            Posting SHU
 
-                </p>
+                        </button>
+
+                    </form>
+
+                <?php else: ?>
+
+                    <form
+                        action="<?= base_url('transaksi_keuangan/reset_shu'); ?>"
+                        method="post"
+                        onsubmit="return confirm('Reset posting SHU periode ini?');">
+
+                        <input
+                            type="hidden"
+                            name="bulan"
+                            value="<?= date('n',strtotime($dari)); ?>">
+
+                        <input
+                            type="hidden"
+                            name="tahun"
+                            value="<?= date('Y',strtotime($dari)); ?>">
+
+                        <button
+                            class="btn btn-danger btn-lg btn-block">
+
+                            <i class="fas fa-trash"></i>
+
+                            Reset Posting SHU
+
+                        </button>
+
+                    </form>
+
+                <?php endif; ?>
 
             </div>
 
-        <?php endif; ?>
+        </div>
 
     </div>
-
-
-
-    <div class="col-md-5 text-right align-self-center">
-
-        <?php if(!$posting_shu): ?>
-
-            <form
-                action="<?= base_url('transaksi_keuangan/posting_shu'); ?>"
-                method="post"
-                onsubmit="return confirm('Posting SHU akan membuat transaksi keuangan dan jurnal otomatis.\n\nLanjutkan ?');">
-
-                <input
-                    type="hidden"
-                    name="bulan"
-                    value="<?= $bulan; ?>">
-
-                <input
-                    type="hidden"
-                    name="tahun"
-                    value="<?= $tahun; ?>">
-
-                <button
-                    class="btn btn-warning btn-lg">
-
-                    <i class="fas fa-upload"></i>
-
-                    Posting SHU
-
-                </button>
-
-            </form>
-
-        <?php else: ?>
-
-            <button
-                class="btn btn-success btn-lg"
-                disabled>
-
-                <i class="fas fa-check"></i>
-
-                Sudah Diposting
-
-            </button>
-
-        <?php endif; ?>
-
-    </div>
-
-</div>
-
-</div>
 
 </div>
 

@@ -12,27 +12,29 @@ class Transaksi_keuangan extends CI_Controller
             redirect('auth/login');
         }
 
-        if (!in_array($this->session->userdata('role_id'), [1,2])) {
-            show_error('Akses ditolak');
+        if (!in_array($this->session->userdata('role_id'), [1, 2])) {
+            show_error('Akses ditolak.');
         }
 
         $this->load->model([
-    'Transaksi_keuangan_model',
-    'Kas_model',
-    'Akun_model',
-    'Unit_usaha_model',
-    'Laba_rugi_model'
-]);
+            'Transaksi_keuangan_model',
+            'Kas_model',
+            'Akun_model',
+            'Unit_usaha_model',
+            'Laba_rugi_model'
+        ]);
     }
 
     /* =====================================================
-     * LIST DATA
+     * LIST TRANSAKSI
      * ===================================================== */
 
     public function index()
     {
-        $data['title'] = 'Transaksi Keuangan';
-        $data['data']  = $this->Transaksi_keuangan_model->get_all();
+        $data = [
+            'title' => 'Transaksi Keuangan',
+            'data'  => $this->Transaksi_keuangan_model->get_all()
+        ];
 
         $this->load->view('templates/header', $data);
         $this->load->view('transaksi_keuangan/index', $data);
@@ -45,11 +47,17 @@ class Transaksi_keuangan extends CI_Controller
 
     public function tambah()
     {
-        $data['title'] = 'Tambah Transaksi Keuangan';
+        $data = [
 
-        $data['kas']        = $this->Kas_model->get_all();
-        $data['akun']       = $this->Akun_model->get_all();
-        $data['unit_usaha'] = $this->Unit_usaha_model->get_all();
+            'title' => 'Tambah Transaksi Keuangan',
+
+            'kas' => $this->Kas_model->get_all(),
+
+            'akun' => $this->Akun_model->get_all(),
+
+            'unit_usaha' => $this->Unit_usaha_model->get_all()
+
+        ];
 
         $this->load->view('templates/header', $data);
         $this->load->view('transaksi_keuangan/tambah', $data);
@@ -57,12 +65,22 @@ class Transaksi_keuangan extends CI_Controller
     }
 
     /* =====================================================
-     * SIMPAN
+     * SIMPAN TRANSAKSI
      * ===================================================== */
 
     public function simpan()
     {
-        $this->Transaksi_keuangan_model->insert($this->input->post());
+        $post = $this->input->post(NULL, TRUE);
+
+        if (!$this->Transaksi_keuangan_model->insert($post)) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi gagal disimpan.'
+            );
+
+            redirect('transaksi_keuangan/tambah');
+        }
 
         $this->session->set_flashdata(
             'success',
@@ -75,72 +93,101 @@ class Transaksi_keuangan extends CI_Controller
     /* =====================================================
      * FORM EDIT
      * ===================================================== */
+        /* =====================================================
+     * FORM EDIT
+     * ===================================================== */
 
-    public function edit($id)
+    public function edit($id = null)
     {
-        $data['title'] = 'Edit Transaksi Keuangan';
-
-        $data['transaksi'] = $this->Transaksi_keuangan_model->get_by_id($id);
-
-        if (!$data['transaksi']) {
+        if (empty($id)) {
             show_404();
         }
+
+        $transaksi = $this->Transaksi_keuangan_model->get_by_id($id);
+
+        if (!$transaksi) {
+            show_404();
+        }
+
         /*
-|--------------------------------------------------------------------------
-| Transaksi SHU tidak boleh diedit
-|--------------------------------------------------------------------------
-*/
+        |------------------------------------------------------
+        | Transaksi SHU tidak boleh diedit
+        |------------------------------------------------------
+        */
 
-if($data['transaksi']->sumber == 'SHU'){
+        if ($transaksi->sumber === 'SHU') {
 
-    $this->session->set_flashdata(
-        'error',
-        'Transaksi SHU tidak dapat diedit. Gunakan Posting SHU.'
-    );
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi SHU tidak dapat diedit. Gunakan menu Posting SHU.'
+            );
 
-    redirect('transaksi_keuangan');
+            redirect('transaksi_keuangan');
+        }
 
-}
+        $data = [
 
-        $data['kas']        = $this->Kas_model->get_all();
-        $data['akun']       = $this->Akun_model->get_all();
-        $data['unit_usaha'] = $this->Unit_usaha_model->get_all();
+            'title'         => 'Edit Transaksi Keuangan',
+
+            'transaksi'     => $transaksi,
+
+            'kas'           => $this->Kas_model->get_all(),
+
+            'akun'          => $this->Akun_model->get_all(),
+
+            'unit_usaha'    => $this->Unit_usaha_model->get_all()
+
+        ];
 
         $this->load->view('templates/header', $data);
         $this->load->view('transaksi_keuangan/edit', $data);
         $this->load->view('templates/footer');
     }
 
+
     /* =====================================================
-     * UPDATE
+     * UPDATE TRANSAKSI
      * ===================================================== */
 
-    public function update($id)
+    public function update($id = null)
     {
-        $trx = $this->Transaksi_keuangan_model->get_by_id($id);
+        if (empty($id)) {
+            show_404();
+        }
 
-if(!$trx){
-    show_404();
-}
+        $transaksi = $this->Transaksi_keuangan_model->get_by_id($id);
 
-if($trx->sumber == 'SHU'){
+        if (!$transaksi) {
+            show_404();
+        }
 
-    $this->session->set_flashdata(
-        'error',
-        'Transaksi SHU tidak dapat diubah.'
-    );
+        /*
+        |------------------------------------------------------
+        | SHU tidak boleh diubah manual
+        |------------------------------------------------------
+        */
 
-    redirect('transaksi_keuangan');
+        if ($transaksi->sumber === 'SHU') {
 
-}
-        $this->Transaksi_keuangan_model->delete_jurnal($id);
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi SHU tidak dapat diubah.'
+            );
 
-        $this->Transaksi_keuangan_model->update(
-            $id,
-            $this->input->post()
-        );
+            redirect('transaksi_keuangan');
+        }
 
-        $this->Transaksi_keuangan_model->recreate_jurnal($id);
+        $post = $this->input->post(NULL, TRUE);
+
+        if (!$this->Transaksi_keuangan_model->update($id, $post)) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi gagal diperbarui.'
+            );
+
+            redirect('transaksi_keuangan/edit/' . $id);
+        }
 
         $this->session->set_flashdata(
             'success',
@@ -150,31 +197,48 @@ if($trx->sumber == 'SHU'){
         redirect('transaksi_keuangan');
     }
 
+
     /* =====================================================
-     * HAPUS
+     * HAPUS TRANSAKSI
      * ===================================================== */
 
-    public function hapus($id)
+    public function hapus($id = null)
     {
-        $trx = $this->Transaksi_keuangan_model->get_by_id($id);
+        if (empty($id)) {
+            show_404();
+        }
 
-if(!$trx){
-    show_404();
-}
+        $transaksi = $this->Transaksi_keuangan_model->get_by_id($id);
 
-if($trx->sumber == 'SHU'){
+        if (!$transaksi) {
+            show_404();
+        }
 
-    $this->session->set_flashdata(
-        'error',
-        'Transaksi SHU tidak dapat dihapus.'
-    );
+        /*
+        |------------------------------------------------------
+        | SHU tidak boleh dihapus manual
+        |------------------------------------------------------
+        */
 
-    redirect('transaksi_keuangan');
+        if ($transaksi->sumber === 'SHU') {
 
-}
-        $this->Transaksi_keuangan_model->delete_jurnal($id);
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi SHU tidak dapat dihapus.'
+            );
 
-        $this->Transaksi_keuangan_model->delete($id);
+            redirect('transaksi_keuangan');
+        }
+
+        if (!$this->Transaksi_keuangan_model->delete($id)) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Transaksi gagal dihapus.'
+            );
+
+            redirect('transaksi_keuangan');
+        }
 
         $this->session->set_flashdata(
             'success',
@@ -183,49 +247,200 @@ if($trx->sumber == 'SHU'){
 
         redirect('transaksi_keuangan');
     }
-/* =====================================================
- * POSTING SHU
- * ===================================================== */
 
-public function posting_shu()
-{
-    $bulan = $this->input->post('bulan');
-    $tahun = $this->input->post('tahun');
 
-    if(empty($bulan) || empty($tahun)){
+    /* =====================================================
+     * POSTING SHU
+     * ===================================================== */
 
-        $this->session->set_flashdata(
-            'error',
-            'Periode belum dipilih.'
-        );
+    public function posting_shu()
+    {
+        /*
+        |------------------------------------------------------
+        | Ambil Periode
+        |------------------------------------------------------
+        */
 
-        redirect('laba_rugi');
-    }
+        $bulan = (int) $this->input->post('bulan', TRUE);
+        $tahun = (int) $this->input->post('tahun', TRUE);
 
-   $proses = $this->Transaksi_keuangan_model
-            ->generate_shu(
-                $bulan,
-                $tahun
+        /*
+        |------------------------------------------------------
+        | Validasi
+        |------------------------------------------------------
+        */
+
+        if ($bulan < 1 || $bulan > 12 || $tahun < 2000) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Periode posting SHU tidak valid.'
             );
 
-if($proses){
+            redirect('laba_rugi');
+        }
 
-    $this->session->set_flashdata(
-        'success',
-        'Posting SHU berhasil dilakukan.'
-    );
+        /*
+        |------------------------------------------------------
+        | Periode
+        |------------------------------------------------------
+        */
 
-}else{
+        $dari = $tahun . '-' . sprintf('%02d', $bulan) . '-01';
 
-    $this->session->set_flashdata(
-        'error',
-        'Posting SHU gagal.'
-    );
+        $sampai = date(
+            'Y-m-t',
+            strtotime($dari)
+        );
 
-}
+        /*
+        |------------------------------------------------------
+        | Proses Posting
+        |------------------------------------------------------
+        */
 
-redirect(
-    'laba_rugi?bulan='.$bulan.'&tahun='.$tahun
-);
-}
+        $hasil = $this->Transaksi_keuangan_model
+                      ->generate_shu(
+                          $bulan,
+                          $tahun
+                      );
+
+        /*
+        |------------------------------------------------------
+        | Hasil
+        |------------------------------------------------------
+        */
+
+        if ($hasil === TRUE) {
+
+            $this->session->set_flashdata(
+                'success',
+                'Posting SHU berhasil dilakukan.'
+            );
+
+        } else {
+
+            $pesan = is_string($hasil)
+                        ? $hasil
+                        : 'Posting SHU gagal.';
+
+            $this->session->set_flashdata(
+                'error',
+                $pesan
+            );
+        }
+
+        /*
+        |------------------------------------------------------
+        | Kembali ke periode yang sama
+        |------------------------------------------------------
+        */
+
+        redirect(
+            'laba_rugi?dari=' .
+            $dari .
+            '&sampai=' .
+            $sampai
+        );
+    }
+
+    /* =====================================================
+     * RESET POSTING SHU
+     * ===================================================== */
+
+    /* =====================================================
+     * RESET POSTING SHU
+     * ===================================================== */
+
+    public function reset_shu()
+    {
+        /*
+        |------------------------------------------------------
+        | Ambil Periode
+        |------------------------------------------------------
+        */
+
+        $bulan = (int) $this->input->post('bulan', TRUE);
+        $tahun = (int) $this->input->post('tahun', TRUE);
+
+        /*
+        |------------------------------------------------------
+        | Validasi
+        |------------------------------------------------------
+        */
+
+        if ($bulan < 1 || $bulan > 12 || $tahun < 2000) {
+
+            $this->session->set_flashdata(
+                'error',
+                'Periode reset SHU tidak valid.'
+            );
+
+            redirect('laba_rugi');
+        }
+
+        /*
+        |------------------------------------------------------
+        | Periode
+        |------------------------------------------------------
+        */
+
+        $dari = $tahun . '-' . sprintf('%02d', $bulan) . '-01';
+
+        $sampai = date(
+            'Y-m-t',
+            strtotime($dari)
+        );
+
+        /*
+        |------------------------------------------------------
+        | Reset SHU
+        |------------------------------------------------------
+        */
+
+        $hasil = $this->Transaksi_keuangan_model
+                      ->reset_shu(
+                          $bulan,
+                          $tahun
+                      );
+
+        /*
+        |------------------------------------------------------
+        | Hasil
+        |------------------------------------------------------
+        */
+
+        if ($hasil === TRUE) {
+
+            $this->session->set_flashdata(
+                'success',
+                'Posting SHU berhasil direset.'
+            );
+
+        } else {
+
+            $pesan = is_string($hasil)
+                        ? $hasil
+                        : 'Reset Posting SHU gagal.';
+
+            $this->session->set_flashdata(
+                'error',
+                $pesan
+            );
+        }
+
+        /*
+        |------------------------------------------------------
+        | Kembali ke periode yang sama
+        |------------------------------------------------------
+        */
+
+        redirect(
+            'laba_rugi?dari=' .
+            $dari .
+            '&sampai=' .
+            $sampai
+        );
+    }
+
 }

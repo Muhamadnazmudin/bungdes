@@ -20,35 +20,35 @@ class Transaksi_keuangan_model extends CI_Model
         return $this->db
             ->select("
                 t.*,
-                k.nama AS nama_kas,
-                a.kode AS kode_akun,
-                a.nama AS nama_akun,
-                u.nama AS nama_unit
+                k.nama  AS nama_kas,
+                a.kode  AS kode_akun,
+                a.nama  AS nama_akun,
+                u.nama  AS nama_unit
             ")
             ->from('transaksi_keuangan t')
-            ->join('kas k','k.id=t.kas_id','left')
-            ->join('akun a','a.id=t.akun_id','left')
-            ->join('unit_usaha u','u.id=t.unit_usaha_id','left')
-            ->order_by('t.tanggal','DESC')
-            ->order_by('t.id','DESC')
+            ->join('kas k', 'k.id=t.kas_id', 'left')
+            ->join('akun a', 'a.id=t.akun_id', 'left')
+            ->join('unit_usaha u', 'u.id=t.unit_usaha_id', 'left')
+            ->order_by('t.tanggal', 'DESC')
+            ->order_by('t.id', 'DESC')
             ->get()
             ->result();
     }
 
     /* =====================================================
-     * DETAIL
+     * DETAIL TRANSAKSI
      * ===================================================== */
 
     public function get_by_id($id)
     {
         return $this->db
-            ->where('id',$id)
+            ->where('id', $id)
             ->get('transaksi_keuangan')
             ->row();
     }
 
     /* =====================================================
-     * SIMPAN
+     * SIMPAN TRANSAKSI
      * ===================================================== */
 
     public function insert($post)
@@ -59,7 +59,7 @@ class Transaksi_keuangan_model extends CI_Model
 
             'tanggal'       => $post['tanggal'],
 
-            'jenis'         => strtoupper($post['jenis']),
+            'jenis'         => strtoupper(trim($post['jenis'])),
 
             'kas_id'        => $post['kas_id'],
 
@@ -67,13 +67,13 @@ class Transaksi_keuangan_model extends CI_Model
 
             'unit_usaha_id' => $post['unit_usaha_id'],
 
-            'nominal'       => str_replace(',','',$post['nominal']),
+            'nominal'       => (float) str_replace(',', '', $post['nominal']),
 
-            'keterangan'    => $post['keterangan'],
+            'keterangan'    => trim($post['keterangan']),
 
-            'sumber'        => isset($post['sumber'])
-                                ? $post['sumber']
-                                : 'MANUAL'
+            'sumber'        => empty($post['sumber'])
+                                ? 'MANUAL'
+                                : strtoupper($post['sumber'])
 
         ];
 
@@ -82,50 +82,64 @@ class Transaksi_keuangan_model extends CI_Model
             $data
         );
 
-        $id = $this->db->insert_id();
+        $transaksi_id = $this->db->insert_id();
 
-        if(!$id){
+        if (!$transaksi_id) {
 
             $this->db->trans_rollback();
 
-            return false;
-
+            return 'Transaksi gagal disimpan.';
         }
 
         /*
-        |---------------------------------------------
+        |------------------------------------------------------
         | Buat jurnal otomatis
-        |---------------------------------------------
+        |------------------------------------------------------
         */
 
-        $this->create_jurnal($id);
+        $jurnal = $this->create_jurnal($transaksi_id);
 
-        if($this->db->trans_status()===FALSE){
+        if ($jurnal !== TRUE) {
 
             $this->db->trans_rollback();
 
-            return false;
+            return $jurnal;
+        }
 
+        if ($this->db->trans_status() === FALSE) {
+
+            $this->db->trans_rollback();
+
+            return 'Terjadi kesalahan database.';
         }
 
         $this->db->trans_commit();
 
-        return true;
+        return TRUE;
     }
 
     /* =====================================================
-     * UPDATE
+     * UPDATE TRANSAKSI
+     * ===================================================== */
+        /* =====================================================
+     * UPDATE TRANSAKSI
      * ===================================================== */
 
-    public function update($id,$post)
+    public function update($id, $post)
     {
+        $transaksi = $this->get_by_id($id);
+
+        if (!$transaksi) {
+            return 'Data transaksi tidak ditemukan.';
+        }
+
         $this->db->trans_begin();
 
         $data = [
 
             'tanggal'       => $post['tanggal'],
 
-            'jenis'         => strtoupper($post['jenis']),
+            'jenis'         => strtoupper(trim($post['jenis'])),
 
             'kas_id'        => $post['kas_id'],
 
@@ -133,73 +147,120 @@ class Transaksi_keuangan_model extends CI_Model
 
             'unit_usaha_id' => $post['unit_usaha_id'],
 
-            'nominal'       => str_replace(',','',$post['nominal']),
+            'nominal'       => (float) str_replace(',', '', $post['nominal']),
 
-            'keterangan'    => $post['keterangan'],
+            'keterangan'    => trim($post['keterangan']),
 
-            'sumber'        => isset($post['sumber'])
-                                ? $post['sumber']
-                                : 'MANUAL'
+            'sumber'        => empty($post['sumber'])
+                                ? $transaksi->sumber
+                                : strtoupper($post['sumber'])
 
         ];
 
         $this->db
-            ->where('id',$id)
-            ->update(
-                'transaksi_keuangan',
-                $data
-            );
+            ->where('id', $id)
+            ->update('transaksi_keuangan', $data);
 
-        /*
-        |---------------------------------------------
-        | Refresh jurnal
-        |---------------------------------------------
-        */
-
-        $this->delete_jurnal($id);
-
-        $this->create_jurnal($id);
-
-        if($this->db->trans_status()===FALSE){
+        if ($this->db->affected_rows() < 0) {
 
             $this->db->trans_rollback();
 
-            return false;
+            return 'Gagal memperbarui transaksi.';
+        }
 
+        /*
+        |------------------------------------------------------
+        | Refresh Jurnal
+        |------------------------------------------------------
+        */
+
+        $hapus = $this->delete_jurnal($id);
+
+        if ($hapus !== TRUE) {
+
+            $this->db->trans_rollback();
+
+            return $hapus;
+        }
+
+        $jurnal = $this->create_jurnal($id);
+
+        if ($jurnal !== TRUE) {
+
+            $this->db->trans_rollback();
+
+            return $jurnal;
+        }
+
+        if ($this->db->trans_status() === FALSE) {
+
+            $this->db->trans_rollback();
+
+            return 'Terjadi kesalahan database.';
         }
 
         $this->db->trans_commit();
 
-        return true;
+        return TRUE;
     }
 
+
     /* =====================================================
-     * HAPUS
+     * HAPUS TRANSAKSI
      * ===================================================== */
 
     public function delete($id)
     {
+        $transaksi = $this->get_by_id($id);
+
+        if (!$transaksi) {
+            return 'Data transaksi tidak ditemukan.';
+        }
+
         $this->db->trans_begin();
 
-        $this->delete_jurnal($id);
+        /*
+        |------------------------------------------------------
+        | Hapus Jurnal
+        |------------------------------------------------------
+        */
 
-        $this->db
-            ->where('id',$id)
-            ->delete('transaksi_keuangan');
+        $hapus = $this->delete_jurnal($id);
 
-        if($this->db->trans_status()===FALSE){
+        if ($hapus !== TRUE) {
 
             $this->db->trans_rollback();
 
-            return false;
+            return $hapus;
+        }
 
+        /*
+        |------------------------------------------------------
+        | Hapus Transaksi
+        |------------------------------------------------------
+        */
+
+        $this->db
+            ->where('id', $id)
+            ->delete('transaksi_keuangan');
+
+        if ($this->db->trans_status() === FALSE) {
+
+            $this->db->trans_rollback();
+
+            return 'Gagal menghapus transaksi.';
         }
 
         $this->db->trans_commit();
 
-        return true;
+        return TRUE;
     }
+
+
     /* =====================================================
+     * MEMBUAT JURNAL
+     * ===================================================== */
+        /* =====================================================
      * MEMBUAT JURNAL
      * ===================================================== */
 
@@ -208,21 +269,33 @@ class Transaksi_keuangan_model extends CI_Model
         $transaksi = $this->get_by_id($transaksi_id);
 
         if (!$transaksi) {
-            return false;
+            return 'Transaksi tidak ditemukan.';
         }
 
+        /*
+        |------------------------------------------------------
+        | Kas
+        |------------------------------------------------------
+        */
+
         $kas = $this->db
-            ->where('id', $transaksi->kas_id)
-            ->get('kas')
-            ->row();
+                    ->where('id', $transaksi->kas_id)
+                    ->get('kas')
+                    ->row();
 
         if (!$kas) {
-            return false;
+            return 'Kas tidak ditemukan.';
         }
 
         if (empty($kas->akun_id)) {
-            return false;
+            return 'Akun Kas belum ditentukan.';
         }
+
+        /*
+        |------------------------------------------------------
+        | Header Jurnal
+        |------------------------------------------------------
+        */
 
         $jurnal = [
 
@@ -230,7 +303,7 @@ class Transaksi_keuangan_model extends CI_Model
 
             'tanggal'       => $transaksi->tanggal,
 
-            'no_bukti'      => 'TRX-' . date('YmdHis') . '-' . $transaksi_id,
+            'no_bukti'      => 'TRX-' . $transaksi_id,
 
             'keterangan'    => $transaksi->keterangan,
 
@@ -247,12 +320,12 @@ class Transaksi_keuangan_model extends CI_Model
         $jurnal_id = $this->db->insert_id();
 
         if (!$jurnal_id) {
-            return false;
+            return 'Gagal membuat jurnal.';
         }
 
         /*
         |------------------------------------------------------
-        | KAS MASUK
+        | Detail Jurnal
         |------------------------------------------------------
         */
 
@@ -272,7 +345,7 @@ class Transaksi_keuangan_model extends CI_Model
 
             ]);
 
-            // Kredit Akun
+            // Kredit Pendapatan
 
             $this->db->insert('jurnal_detail', [
 
@@ -286,17 +359,9 @@ class Transaksi_keuangan_model extends CI_Model
 
             ]);
 
-        }
+        } else {
 
-        /*
-        |------------------------------------------------------
-        | KAS KELUAR
-        |------------------------------------------------------
-        */
-
-        else {
-
-            // Debit Beban / Aktiva
+            // Debit Beban
 
             $this->db->insert('jurnal_detail', [
 
@@ -326,7 +391,11 @@ class Transaksi_keuangan_model extends CI_Model
 
         }
 
-        return true;
+        if ($this->db->trans_status() === FALSE) {
+            return 'Gagal menyimpan jurnal.';
+        }
+
+        return TRUE;
     }
 
 
@@ -337,23 +406,27 @@ class Transaksi_keuangan_model extends CI_Model
     public function delete_jurnal($transaksi_id)
     {
         $jurnal = $this->db
-            ->where('transaksi_id', $transaksi_id)
-            ->get('jurnal')
-            ->row();
+                       ->where('transaksi_id', $transaksi_id)
+                       ->get('jurnal')
+                       ->row();
 
         if (!$jurnal) {
-            return true;
+            return TRUE;
         }
 
         $this->db
-            ->where('jurnal_id', $jurnal->id)
-            ->delete('jurnal_detail');
+             ->where('jurnal_id', $jurnal->id)
+             ->delete('jurnal_detail');
 
         $this->db
-            ->where('id', $jurnal->id)
-            ->delete('jurnal');
+             ->where('id', $jurnal->id)
+             ->delete('jurnal');
 
-        return true;
+        if ($this->db->trans_status() === FALSE) {
+            return 'Gagal menghapus jurnal.';
+        }
+
+        return TRUE;
     }
 
 
@@ -363,10 +436,19 @@ class Transaksi_keuangan_model extends CI_Model
 
     public function recreate_jurnal($transaksi_id)
     {
-        $this->delete_jurnal($transaksi_id);
+        $hapus = $this->delete_jurnal($transaksi_id);
+
+        if ($hapus !== TRUE) {
+            return $hapus;
+        }
 
         return $this->create_jurnal($transaksi_id);
     }
+
+
+    /* =====================================================
+     * DEFAULT KAS
+     * ===================================================== */
         /* =====================================================
      * MASTER KAS
      * ===================================================== */
@@ -374,15 +456,15 @@ class Transaksi_keuangan_model extends CI_Model
     public function get_kas()
     {
         return $this->db
-            ->select('
+            ->select("
                 k.*,
                 a.kode,
                 a.nama AS nama_akun
-            ')
+            ")
             ->from('kas k')
-            ->join('akun a','a.id=k.akun_id','left')
-            ->where('k.aktif',1)
-            ->order_by('k.nama','ASC')
+            ->join('akun a', 'a.id = k.akun_id', 'left')
+            ->where('k.aktif', 1)
+            ->order_by('k.nama', 'ASC')
             ->get()
             ->result();
     }
@@ -395,8 +477,8 @@ class Transaksi_keuangan_model extends CI_Model
     public function get_akun()
     {
         return $this->db
-            ->where('aktif',1)
-            ->order_by('kode','ASC')
+            ->where('aktif', 1)
+            ->order_by('kode', 'ASC')
             ->get('akun')
             ->result();
     }
@@ -409,8 +491,8 @@ class Transaksi_keuangan_model extends CI_Model
     public function get_unit_usaha()
     {
         return $this->db
-            ->where('aktif',1)
-            ->order_by('nama','ASC')
+            ->where('aktif', 1)
+            ->order_by('nama', 'ASC')
             ->get('unit_usaha')
             ->result();
     }
@@ -423,18 +505,19 @@ class Transaksi_keuangan_model extends CI_Model
     private function default_kas()
     {
         $kas = $this->db
-            ->where('aktif',1)
-            ->where('is_default',1)
+            ->where('aktif', 1)
+            ->where('is_default', 1)
+            ->limit(1)
             ->get('kas')
             ->row();
 
-        if($kas){
+        if ($kas) {
             return $kas;
         }
 
         return $this->db
-            ->where('aktif',1)
-            ->order_by('id','ASC')
+            ->where('aktif', 1)
+            ->order_by('id', 'ASC')
             ->limit(1)
             ->get('kas')
             ->row();
@@ -448,18 +531,19 @@ class Transaksi_keuangan_model extends CI_Model
     private function default_unit()
     {
         $unit = $this->db
-            ->where('aktif',1)
-            ->where('is_default',1)
+            ->where('aktif', 1)
+            ->where('is_default', 1)
+            ->limit(1)
             ->get('unit_usaha')
             ->row();
 
-        if($unit){
+        if ($unit) {
             return $unit;
         }
 
         return $this->db
-            ->where('aktif',1)
-            ->order_by('id','ASC')
+            ->where('aktif', 1)
+            ->order_by('id', 'ASC')
             ->limit(1)
             ->get('unit_usaha')
             ->row();
@@ -467,16 +551,17 @@ class Transaksi_keuangan_model extends CI_Model
 
 
     /* =====================================================
-     * TRANSAKSI SHU PERIODE
+     * TRANSAKSI SHU PER PERIODE
      * ===================================================== */
 
-    private function get_transaksi_shu($akun_id,$bulan,$tahun)
+    private function get_transaksi_shu($akun_id, $bulan, $tahun)
     {
         return $this->db
-            ->where('akun_id',$akun_id)
-            ->where('sumber','SHU')
-            ->where('MONTH(tanggal)',$bulan)
-            ->where('YEAR(tanggal)',$tahun)
+            ->where('akun_id', $akun_id)
+            ->where('sumber', 'SHU')
+            ->where('MONTH(tanggal)', $bulan)
+            ->where('YEAR(tanggal)', $tahun)
+            ->limit(1)
             ->get('transaksi_keuangan')
             ->row();
     }
@@ -486,21 +571,50 @@ class Transaksi_keuangan_model extends CI_Model
      * STATUS POSTING SHU
      * ===================================================== */
 
-    public function sudah_posting_shu($bulan,$tahun)
+    public function sudah_posting_shu($dari, $sampai)
     {
         return $this->db
-            ->where('sumber','SHU')
-            ->where('MONTH(tanggal)',$bulan)
-            ->where('YEAR(tanggal)',$tahun)
-            ->count_all_results('transaksi_keuangan') > 0;
+                ->where('sumber', 'SHU')
+                ->where('tanggal >=', $dari)
+                ->where('tanggal <=', $sampai)
+                ->count_all_results('transaksi_keuangan') > 0;
     }
+
+
+   
         /* =====================================================
      * POSTING SHU
      * ===================================================== */
 
-    public function generate_shu($bulan,$tahun)
+    public function generate_shu($bulan, $tahun)
     {
         $this->db->trans_begin();
+
+        /*
+        |------------------------------------------------------
+        | Periode
+        |------------------------------------------------------
+        */
+
+        $dari = $tahun . '-' . sprintf('%02d', $bulan) . '-01';
+
+        $sampai = date(
+            'Y-m-t',
+            strtotime($dari)
+        );
+
+        /*
+        |------------------------------------------------------
+        | Cek sudah pernah posting?
+        |------------------------------------------------------
+        */
+
+        if ($this->sudah_posting_shu($dari, $sampai)) {
+
+            $this->db->trans_rollback();
+
+            return 'SHU periode tersebut sudah diposting.';
+        }
 
         /*
         |------------------------------------------------------
@@ -509,40 +623,41 @@ class Transaksi_keuangan_model extends CI_Model
         */
 
         $laporan = $this->Laba_rugi_model
-                        ->get_laporan($bulan,$tahun);
+                        ->get_laporan($dari, $sampai);
 
-        if(empty($laporan['master_shu'])){
+                        
+
+        if (empty($laporan['master_shu'])) {
 
             $this->db->trans_rollback();
 
-            return false;
-
+            return 'Master SHU belum dibuat.';
         }
 
         /*
         |------------------------------------------------------
-        | Kas & Unit Default
+        | Kas Default
         |------------------------------------------------------
         */
 
-        $kas = $this->default_kas();
+       $kas = $this->db
+    ->where('akun_id', 9)
+    ->get('kas')
+    ->row();
 
-        if(!$kas){
-
-            $this->db->trans_rollback();
-
-            return false;
-
-        }
+        /*
+        |------------------------------------------------------
+        | Unit Usaha Default
+        |------------------------------------------------------
+        */
 
         $unit = $this->default_unit();
 
-        if(!$unit){
+        if (!$unit) {
 
             $this->db->trans_rollback();
 
-            return false;
-
+            return 'Unit usaha default belum ditentukan.';
         }
 
         /*
@@ -551,44 +666,23 @@ class Transaksi_keuangan_model extends CI_Model
         |------------------------------------------------------
         */
 
-        $tanggal = date(
-            'Y-m-t',
-            strtotime($tahun.'-'.$bulan.'-01')
-        );
+        $tanggal = $sampai;
 
         /*
         |------------------------------------------------------
-        | Loop Master SHU
+        | Simpan seluruh pembagian SHU
         |------------------------------------------------------
         */
 
-        foreach($laporan['master_shu'] as $item){
+        foreach ($laporan['master_shu'] as $item) {
 
-            /*
-            -----------------------------------------
-            Validasi
-            -----------------------------------------
-            */
-
-            if(empty($item['akun_id'])){
+            if (empty($item['akun_id'])) {
                 continue;
             }
 
-            if($item['nominal'] <= 0){
+            if ($item['nominal'] <= 0) {
                 continue;
             }
-
-            /*
-            -----------------------------------------
-            Sudah ada transaksi?
-            -----------------------------------------
-            */
-
-            $trx = $this->get_transaksi_shu(
-                $item['akun_id'],
-                $bulan,
-                $tahun
-            );
 
             $data = [
 
@@ -604,51 +698,146 @@ class Transaksi_keuangan_model extends CI_Model
 
                 'nominal'       => $item['nominal'],
 
-                'keterangan'    => 'Posting SHU - '.$item['nama'],
+                'keterangan'    => 'Posting SHU - ' . $item['nama'] .
+                                   ' Periode ' .
+                                   date('F Y', strtotime($tanggal)),
 
                 'sumber'        => 'SHU'
 
             ];
 
-            /*
-            -----------------------------------------
-            UPDATE
-            -----------------------------------------
-            */
+            $this->db->insert(
+                'transaksi_keuangan',
+                $data
+            );
 
-            if($trx){
+            $transaksi_id = $this->db->insert_id();
 
-                $this->db
-                    ->where('id',$trx->id)
-                    ->update(
-                        'transaksi_keuangan',
-                        $data
-                    );
+            if (!$transaksi_id) {
 
-                $this->recreate_jurnal($trx->id);
+                $this->db->trans_rollback();
 
+                return 'Gagal menyimpan transaksi SHU.';
             }
 
-            /*
-            -----------------------------------------
-            INSERT
-            -----------------------------------------
-            */
+            $jurnal = $this->create_jurnal($transaksi_id);
 
-            else{
+            if ($jurnal !== TRUE) {
 
-                $this->db
-                    ->insert(
-                        'transaksi_keuangan',
-                        $data
-                    );
+                $this->db->trans_rollback();
 
-                $id = $this->db->insert_id();
+                return $jurnal;
+            }
+        }
 
-                $this->create_jurnal($id);
+        /*
+        |------------------------------------------------------
+        | Simpan Riwayat Posting
+        |------------------------------------------------------
+        */
 
+        $this->db->insert('posting_shu', [
+
+            'bulan'           => $bulan,
+
+            'tahun'           => $tahun,
+
+            'tanggal_posting' => date('Y-m-d H:i:s'),
+
+            'laba_usaha'      => $laporan['laba_usaha'],
+
+            'sisa_shu'        => $laporan['sisa_shu'],
+
+            'status'          => 'POSTING',
+
+            'user_id'         => $this->session->userdata('user_id'),
+
+            'created_at'      => date('Y-m-d H:i:s')
+
+        ]);
+
+        if ($this->db->trans_status() === FALSE) {
+
+            $this->db->trans_rollback();
+
+            return 'Posting SHU gagal.';
+        }
+
+        $this->db->trans_commit();
+
+        return TRUE;
+    }
+
+    /* =====================================================
+     * RESET POSTING SHU
+     * ===================================================== */
+        /* =====================================================
+     * RESET POSTING SHU
+     * ===================================================== */
+
+    public function reset_shu($bulan, $tahun)
+    {
+        $this->db->trans_begin();
+
+        /*
+        |------------------------------------------------------
+        | Ambil seluruh transaksi SHU periode tersebut
+        |------------------------------------------------------
+        */
+
+        $transaksi = $this->db
+            ->where('sumber', 'SHU')
+            ->where('MONTH(tanggal)', $bulan)
+            ->where('YEAR(tanggal)', $tahun)
+            ->order_by('id', 'ASC')
+            ->get('transaksi_keuangan')
+            ->result();
+
+        /*
+        |------------------------------------------------------
+        | Hapus jurnal & transaksi
+        |------------------------------------------------------
+        */
+
+        foreach ($transaksi as $trx) {
+
+            $hapus = $this->delete_jurnal($trx->id);
+
+            if ($hapus !== TRUE) {
+
+                $this->db->trans_rollback();
+
+                return $hapus;
             }
 
+            $this->db
+                ->where('id', $trx->id)
+                ->delete('transaksi_keuangan');
+
+            if ($this->db->trans_status() === FALSE) {
+
+                $this->db->trans_rollback();
+
+                return 'Gagal menghapus transaksi SHU.';
+            }
+        }
+
+        /*
+        |------------------------------------------------------
+        | Hapus riwayat posting SHU
+        |------------------------------------------------------
+        */
+
+        $this->db
+            ->where('bulan', $bulan)
+            ->where('tahun', $tahun)
+            ->delete('posting_shu');
+
+        if ($this->db->trans_status() === FALSE) {
+
+            $this->db->trans_rollback();
+
+            return 'Gagal menghapus riwayat posting SHU.';
         }
 
         /*
@@ -657,17 +846,9 @@ class Transaksi_keuangan_model extends CI_Model
         |------------------------------------------------------
         */
 
-        if($this->db->trans_status()===FALSE){
-
-            $this->db->trans_rollback();
-
-            return false;
-
-        }
-
         $this->db->trans_commit();
 
-        return true;
+        return TRUE;
     }
 
 }

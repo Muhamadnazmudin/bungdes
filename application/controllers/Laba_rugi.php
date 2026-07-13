@@ -26,35 +26,45 @@ class Laba_rugi extends CI_Controller {
 
    public function index()
 {
-    $bulan = $this->input->get('bulan');
-    $tahun = $this->input->get('tahun');
+    $dari   = $this->input->get('dari', TRUE);
+    $sampai = $this->input->get('sampai', TRUE);
 
-    if (!$bulan) {
-        $bulan = date('n');
+    /*
+    |--------------------------------------------------------------------------
+    | Default Periode
+    |--------------------------------------------------------------------------
+    */
+
+    if (empty($dari)) {
+        $dari = date('Y-01-01');
     }
 
-    if (!$tahun) {
-        $tahun = date('Y');
+    if (empty($sampai)) {
+        $sampai = date('Y-12-31');
     }
 
-    $laporan = $this->Laba_rugi_model->get_laporan($bulan, $tahun);
+    $laporan = $this->Laba_rugi_model
+                    ->get_laporan($dari, $sampai);
 
     $data = [
 
-        'title'      => 'Laporan Laba Rugi',
+        'title'   => 'Laporan Laba Rugi',
 
-        'bulan'      => $bulan,
+        'dari'    => $dari,
 
-        'tahun'      => $tahun,
+        'sampai'  => $sampai,
+
+        'laporan' => $laporan,
 
         'pendapatan' => $laporan['pendapatan'],
 
-        'beban'      => $laporan['beban'],
-
-        'laporan'    => $laporan,
+        'beban' => $laporan['beban'],
 
         'posting_shu' => $this->Transaksi_keuangan_model
-                              ->sudah_posting_shu($bulan,$tahun)
+                              ->sudah_posting_shu(
+                                  $dari,
+                                  $sampai
+                              )
 
     ];
 
@@ -63,51 +73,108 @@ class Laba_rugi extends CI_Controller {
     $this->load->view('templates/footer');
 }
     /* =====================================================
-     * CETAK PDF
-     * ===================================================== */
+ * CETAK PDF
+ * ===================================================== */
 
-    public function cetak_pdf()
-    {
-        $bulan = $this->input->get('bulan');
-        $tahun = $this->input->get('tahun');
+/* =====================================================
+ * CETAK PDF
+ * ===================================================== */
 
-        if (!$tahun) {
-            $tahun = date('Y');
-        }
+public function cetak_pdf()
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Periode
+    |--------------------------------------------------------------------------
+    */
 
-        $data['bulan'] = $bulan;
-        $data['tahun'] = $tahun;
+    $dari   = $this->input->get('dari', TRUE);
+    $sampai = $this->input->get('sampai', TRUE);
 
-        $$laporan = $this->Laba_rugi_model->get_laporan($bulan,$tahun);
-
-$data = [
-    'bulan'=>$bulan,
-    'tahun'=>$tahun,
-    'laporan'=>$laporan,
-    'pendapatan'=>$laporan['pendapatan'],
-    'beban'=>$laporan['beban']
-];
-
-        $html = $this->load->view(
-            'laba_rugi/cetak_pdf',
-            $data,
-            true
-        );
-
-        $pdf = $this->dompdf_lib->create();
-
-        $pdf->loadHtml($html);
-
-        $pdf->setPaper('A4','portrait');
-
-        $pdf->render();
-
-        $pdf->stream(
-            'Laporan_Laba_Rugi.pdf',
-            ['Attachment'=>false]
-        );
+    if (empty($dari)) {
+        $dari = date('Y-01-01');
     }
 
+    if (empty($sampai)) {
+        $sampai = date('Y-12-31');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ambil Data Laporan
+    |--------------------------------------------------------------------------
+    */
+
+    $laporan = $this->Laba_rugi_model
+                    ->get_laporan(
+                        $dari,
+                        $sampai
+                    );
+
+    $data = [
+
+        'title'      => 'Laporan Laba Rugi',
+
+        'dari'       => $dari,
+
+        'sampai'     => $sampai,
+
+        'laporan'    => $laporan,
+
+        'pendapatan' => $laporan['pendapatan'],
+
+        'beban'      => $laporan['beban']
+
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTML
+    |--------------------------------------------------------------------------
+    */
+
+    $html = $this->load->view(
+        'laba_rugi/cetak_pdf',
+        $data,
+        TRUE
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dompdf
+    |--------------------------------------------------------------------------
+    */
+
+    $this->load->library('dompdf_lib');
+
+    $pdf = $this->dompdf_lib->create();
+
+    $pdf->loadHtml($html);
+
+    $pdf->setPaper('A4', 'portrait');
+
+    $pdf->render();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Output
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf->stream(
+
+        'Laporan_Laba_Rugi_' .
+        date('Ymd', strtotime($dari)) .
+        '_' .
+        date('Ymd', strtotime($sampai)) .
+        '.pdf',
+
+        [
+            'Attachment' => true
+        ]
+
+    );
+}
 
     /* =====================================================
      * EXPORT EXCEL
@@ -123,158 +190,73 @@ $data = [
 
 public function posting_shu()
 {
-    $bulan = $this->input->post('bulan');
-    $tahun = $this->input->post('tahun');
+    /*
+    |--------------------------------------------------------------------------
+    | Ambil Periode
+    |--------------------------------------------------------------------------
+    */
 
-    if (!$bulan || !$tahun) {
+    $bulan = (int) $this->input->post('bulan');
+    $tahun = (int) $this->input->post('tahun');
+
+    if ($bulan < 1 || $bulan > 12 || $tahun < 2000) {
 
         $this->session->set_flashdata(
             'error',
-            'Periode belum dipilih.'
+            'Periode tidak valid.'
         );
 
         redirect('laba_rugi');
     }
 
     /*
-|--------------------------------------------------------------------------
-| Sudah posting?
-|--------------------------------------------------------------------------
-*/
-
-if ($this->Transaksi_keuangan_model
-        ->sudah_posting_shu($bulan,$tahun)) {
-
-    $this->session->set_flashdata(
-
-        'error',
-
-        'SHU periode tersebut sudah pernah diposting.'
-
-    );
-
-    redirect(
-        'laba_rugi?bulan='.$bulan.'&tahun='.$tahun
-    );
-
-}
-
-    /*
     |--------------------------------------------------------------------------
-    | Hitung SHU
+    | Periode
     |--------------------------------------------------------------------------
     */
 
-    $hasil = $this->Laba_rugi_model
-                ->get_laporan($bulan,$tahun);
+    $dari = $tahun . '-' . sprintf('%02d', $bulan) . '-01';
 
-    /*
-    |--------------------------------------------------------------------------
-    | Simpan Header Posting
-    |--------------------------------------------------------------------------
-    */
-
-    $posting_id = $this->Posting_shu_model
-                        ->simpanPosting(
-                            $bulan,
-                            $tahun,
-                            $hasil
-                        );
-
-    /*
-    |--------------------------------------------------------------------------
-    | Tanggal Posting
-    |--------------------------------------------------------------------------
-    */
-
-    $tanggal = date(
+    $sampai = date(
         'Y-m-t',
-        strtotime($tahun.'-'.$bulan.'-01')
+        strtotime($dari)
     );
 
     /*
     |--------------------------------------------------------------------------
-    | Data Pembagian SHU
+    | Generate Posting SHU
     |--------------------------------------------------------------------------
     */
 
-    foreach($hasil['pembagian'] as $item){
+    $hasil = $this->Transaksi_keuangan_model
+                  ->generate_shu($bulan, $tahun);
 
-        $akun_id = $this->getAkunShu($item['nama']);
+    if ($hasil) {
 
-        if(!$akun_id){
-            continue;
-        }
+        $this->session->set_flashdata(
+            'success',
+            'Posting SHU berhasil dilakukan.'
+        );
 
-        $this->Transaksi_keuangan_model->insert([
+    } else {
 
-            'tanggal'         => $tanggal,
-
-            'jenis'           => 'KELUAR',
-
-            'kas_id' => $hasil['kas_id'],
-
-            'akun_id'         => $akun_id,
-
-            'unit_usaha_id' => $hasil['unit_usaha_id'],
-
-            'posting_shu_id'  => $posting_id,
-
-            'sumber'          => 'POSTING_SHU',
-
-            'referensi_id'    => $posting_id,
-
-            'nominal'         => $item['nominal'],
-
-            'keterangan'      => $item['nama'].' Bulan '.$bulan.' Tahun '.$tahun
-
-        ]);
+        $this->session->set_flashdata(
+            'error',
+            'Posting SHU gagal atau SHU sudah pernah diposting.'
+        );
 
     }
 
-    $this->session->set_flashdata(
-        'success',
-        'Posting SHU berhasil dilakukan.'
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | Kembali ke periode yang sama
+    |--------------------------------------------------------------------------
+    */
 
     redirect(
-        'laba_rugi?bulan='.$bulan.'&tahun='.$tahun
+        'laba_rugi?dari=' . $dari .
+        '&sampai=' . $sampai
     );
-
 }
-/* =====================================================
- * MAPPING AKUN SHU
- * ===================================================== */
 
-private function getAkunShu($nama)
-{
-
-    $mapping = [
-
-        'Insentif Penasehat / Kepala Desa' => 'Beban Insentif Kepala Desa',
-
-        'PADes' => 'Beban PADes',
-
-        'Dana Sosial' => 'Beban Dana Sosial',
-
-        'Jasa Produksi' => 'Beban Jasa Produksi',
-
-        'Cadangan' => 'Beban Cadangan',
-
-        'Kesejahteraan' => 'Beban Kesejahteraan'
-
-    ];
-
-    if(!isset($mapping[$nama])){
-        return null;
-    }
-
-    $akun = $this->db
-                ->where('nama',$mapping[$nama])
-                ->get('akun')
-                ->row();
-
-    return $akun ? $akun->id : null;
-
-}
 }
